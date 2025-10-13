@@ -1,22 +1,60 @@
-deploy:
+name: Build and Deploy Python App to Azure Web App
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python version
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11' # プロジェクトに合わせたPythonのバージョンを指定
+
+      - name: Create and start virtual environment
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+      
+      - name: Install dependencies
+        run: pip install -r requirements.txt # requirements.txt がある場合
+
+      # --- アーティファクトの準備 ---
+      # standaloneデプロイに必要なファイルをzipにまとめる
+      - name: Zip artifact for deployment
+        run: zip release.zip ./* -r
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-app
+          path: release.zip
+
+  deploy:
     runs-on: ubuntu-latest
     needs: build
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-
+    
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
-          name: python-app # Make sure this name matches your build job's artifact name
+          name: python-app
 
-      # ▼▼▼ ADD THIS LOGIN STEP ▼▼▼
+      # ▼▼▼【ここが修正点】デプロイの前にログイン処理を追加 ▼▼▼
       - name: 'Login to Azure'
         uses: azure/login@v1
         with:
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_BA177B937CB744819220295DD7EC7503 }} # Use the same secret
-      # ▲▲▲ LOGIN STEP ENDS HERE ▲▲▲
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_BA177B937CB744819220295DD7EC7503 }}
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
@@ -24,4 +62,4 @@ deploy:
         with:
           app-name: 'app-002-gen10-step3-1-py-oshima42'
           slot-name: 'Production'
-          package: .
+          package: release.zip # 展開するパッケージ名を指定
