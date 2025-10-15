@@ -14,13 +14,15 @@ app = FastAPI()
 
 # --- CORS設定 ---
 # フロントエンドのURLに合わせて適宜変更してください
+# CORS設定を更新
 origins = [
     "http://localhost:3000",
     "https://localhost:3000",
     "http://192.168.2.140:3000",
     "https://192.168.2.140:3000",
-    # AzureのWeb AppのURLも追加しておくと安心です
     "https://app-002-gen10-step3-1-py-oshima42.azurewebsites.net",
+    "https://app-002-gen10-step3-1-node-oshima42.azurewebsites.net",  # Frontend URL
+    "https://app-002-gen10-step3-1-node-oshima42-*.azurewebsites.net",  # スロット用
 ]
 
 app.add_middleware(
