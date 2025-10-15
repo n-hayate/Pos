@@ -1,16 +1,51 @@
-# Pythonのキャッシュファイル
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# 仮想環境フォルダ
+# 仮想環境
 venv/
+env/
+ENV/
+env.bak/
+venv.bak/
 
-# 環境変数ファイル（DBのパスワードなど機密情報）
+# 環境変数ファイル
 .env
+.env.local
 
-# その他OSが自動生成するファイル
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
 .DS_Store
+Thumbs.db
 
-# 証明書や秘密鍵ファイル
+# ログファイル
+*.log
+
+# 証明書
 *.pem
 *.crt
+*.key
