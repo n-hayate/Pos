@@ -1,31 +1,32 @@
-# database.py (最終版)
-import mysql.connector
+# database.py
 import os
+import pymysql
 from dotenv import load_dotenv
 
-# .envファイルから環境変数を読み込む
 load_dotenv()
 
 def get_db_connection():
-    """データベース接続を取得する関数"""
+    """
+    リクエストごとに新しいデータベース接続を確立して返します。
+    PyMySQLを使用し、Azure Database for MySQLへの接続を想定しています。
+    """
     try:
-        # SSL設定を辞書として準備
-        ssl_args = {
-            'ssl_ca': os.getenv("SSL_CA_PATH"),
-            'ssl_verify_cert': True  # SSL証明書の検証を強制する
-        }
-        
-        conn = mysql.connector.connect(
-            host=os.getenv("DB_HOST"),
-            port=os.getenv("DB_PORT"),
-            user=os.getenv("DB_USER"),
-            password=os.getenv("DB_PASSWORD"),
-            database=os.getenv("DB_NAME"),
-            use_pure=True,  # より安定したPure Python実装を使用する
-            **ssl_args      # SSL設定を渡す
+        conn = pymysql.connect(
+            host=os.environ.get("DB_HOST"),
+            user=os.environ.get("DB_USER"),
+            password=os.environ.get("DB_PASSWORD"),
+            database=os.environ.get("DB_NAME"),
+            port=int(os.environ.get("DB_PORT", 3306)),
+            # PyMySQLではカーソルをDictCursorにすることで、
+            # カラム名をキーとする辞書形式で結果を取得できます。
+            cursorclass=pymysql.cursors.DictCursor,
+            connect_timeout=10,
+            # Azureに接続するための推奨SSL設定
+            ssl_verify_cert=True,
+            ssl_verify_identity=True
         )
-        print("--- データベース接続成功！ ---")
+        # print("--- データベース接続成功！ ---") # ログが大量になるためコメントアウト推奨
         return conn
-    except mysql.connector.Error as err:
-        print(f"データベース接続エラー: {err}")
+    except pymysql.Error as e:
+        print(f"!!!!!! データベース接続エラー !!!!!!!: {e}")
         return None
